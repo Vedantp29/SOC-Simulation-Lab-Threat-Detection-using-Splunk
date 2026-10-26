@@ -1,0 +1,22 @@
+/* ============================================================
+   Detection : Suspicious PowerShell command lines
+   ATT&CK    : T1059.001 (Command and Scripting Interpreter: PowerShell)
+   Telemetry : Sysmon Event ID 1 (index=sysmon); optional PowerShell
+               Script Block Logging 4104 if collected separately.
+   STATUS    : DRAFT - not validated against real data.
+   Field names (Image, CommandLine, ParentImage, User) depend on the
+   Sysmon add-on / props configured. Verify with | fieldsummary.
+   ============================================================ */
+
+index=sysmon (EventCode=1 OR EventID=1)
+    (Image="*\\powershell.exe" OR Image="*\\pwsh.exe")
+    (CommandLine="*-EncodedCommand*" OR CommandLine="* -enc *" OR CommandLine="* -e *"
+     OR CommandLine="*DownloadString*" OR CommandLine="*Invoke-Expression*" OR CommandLine="*IEX*"
+     OR CommandLine="*-WindowStyle Hidden*" OR CommandLine="*-NoProfile*-ExecutionPolicy Bypass*")
+| table _time host User Image CommandLine ParentImage
+| sort - _time
+
+/* --- Optional: decode -EncodedCommand for triage (UTF-16LE base64) --- */
+index=sysmon (EventCode=1 OR EventID=1) Image="*\\powershell.exe" CommandLine="*-EncodedCommand*"
+| rex field=CommandLine "(?i)-e(?:nc(?:odedcommand)?)?\s+(?<b64>[A-Za-z0-9+/=]{16,})"
+| table _time host User ParentImage b64 CommandLine

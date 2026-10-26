@@ -1,0 +1,34 @@
+/* ============================================================
+   Detection : Possible brute-force logon attempts
+   ATT&CK    : T1110 (Brute Force)
+   Telemetry : Windows Security 4625 (index=wineventlog)
+               Linux sshd "Failed password" (index=linux)
+   STATUS    : DRAFT - not validated against real data.
+   Field names (user, src_ip) depend on the Splunk Add-on for
+   Microsoft Windows / Linux add-on in use. Verify with:
+     index=wineventlog EventCode=4625 | fieldsummary
+   ============================================================ */
+
+/* --- A) Windows: >= 10 failed logons from one source in 5 min --- */
+index=wineventlog (EventCode=4625 OR EventID=4625)
+| eval src=coalesce(src_ip, Source_Network_Address), acct=coalesce(user, Account_Name)
+| bin _time span=5m
+| stats count as failures dc(acct) as distinct_accounts values(acct) as accounts by _time host src
+| where failures >= 10
+| sort - failures
+
+/* --- B) Linux: >= 10 sshd failed passwords from one source in 5 min --- */
+index=linux "Failed password"
+| rex "from (?<src>\d{1,3}(?:\.\d{1,3}){3})"
+| rex "for (?:invalid user )?(?<acct>\S+) from"
+| bin _time span=5m
+| stats count as failures dc(acct) as distinct_accounts values(acct) as accounts by _time host src
+| where failures >= 10
+| sort - failures
+
+/* --- C) Follow-up: failures followed by a success (4624) from same source ---
+   A success AFTER many failures raises priority; it is still NOT proof of compromise. */
+index=wineventlog (EventCode=4625 OR EventCode=4624)
+| eval src=coalesce(src_ip, Source_Network_Address)
+| stats count(eval(EventCode=4625)) as failures count(eval(EventCode=4624)) as successes by host src
+| where failures >= 10 AND successes >= 1
