@@ -58,7 +58,7 @@ source is the lab's Kali machine running a controlled failed-login test.
 
 ## 8. Triage decision
 Close as authorized test. If the source had been unrecognised: escalate, review 4624 session, reset
-affected credentials, review Sysmon activity after the success.
+affected credentials, review Sysmon activity after the success. 
 
 ## 9. Remediation / follow-up (illustrative)
 | Action | Status |
