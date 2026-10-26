@@ -1,0 +1,21 @@
+/* ============================================================
+   Detection : Possible network service discovery / port scan
+   ATT&CK    : T1046 (Network Service Discovery)
+   Telemetry : Firewall / network connection logs (index=firewall)
+               with fields src_ip, dest_ip, dest_port.
+   STATUS    : DRAFT - not validated against real data.
+   Adjust the threshold (15) after observing normal traffic.
+   ============================================================ */
+
+index=firewall
+| bin _time span=1m
+| stats dc(dest_port) as unique_ports count by _time src_ip dest_ip
+| where unique_ports >= 15
+| sort - unique_ports
+
+/* --- Optional: horizontal sweep (one source, many destinations) --- */
+index=firewall
+| bin _time span=5m
+| stats dc(dest_ip) as unique_hosts dc(dest_port) as unique_ports count by _time src_ip
+| where unique_hosts >= 10
+| sort - unique_hosts
