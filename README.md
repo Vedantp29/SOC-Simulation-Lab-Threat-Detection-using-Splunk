@@ -180,8 +180,8 @@ Replace the placeholders with your GitHub usernames and the parts each person ac
 
 | Contributor | GitHub | Areas owned |
 |---|---|---|
-| Contributor 1 | [@username-1](https://github.com/username-1) | e.g. Splunk server, Windows + Sysmon forwarder, brute-force and PowerShell detections |
-| Contributor 2 | [@username-2](https://github.com/username-2) | e.g. Linux forwarder, Kali tests, port-scan detection, dashboard |
+| Amaanali Motiwala | [@AmaanaliMotiwala0109](https://github.com/AmaanaliMotiwala0109) | e.g. Splunk server, Windows + Sysmon forwarder, brute-force and PowerShell detections |
+| Vedant Patel | [@Vedantp29](https://github.com/Vedantp29) | e.g. Linux forwarder, Kali tests, port-scan detection, dashboard |
 
 Workflow: see [`CONTRIBUTING.md`](CONTRIBUTING.md) (branches + pull requests with peer review).
 
